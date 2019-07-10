@@ -11,7 +11,7 @@ from vnpy.app.cta_strategy import (
 )
 
 
-class TurtleSignalStrategy(CtaTemplate):
+class TurtleSignalStrategy05(CtaTemplate):
     """"""
     author = "用Python的交易员"
 
@@ -36,7 +36,7 @@ class TurtleSignalStrategy(CtaTemplate):
 
     def __init__(self, cta_engine, strategy_name, vt_symbol, setting):
         """"""
-        super(TurtleSignalStrategy, self).__init__(
+        super(TurtleSignalStrategy05, self).__init__(
             cta_engine, strategy_name, vt_symbol, setting
         )
 
@@ -95,13 +95,13 @@ class TurtleSignalStrategy(CtaTemplate):
             self.send_buy_orders(self.long_entry)
 
             sell_price = max(self.long_stop, self.exit_down)
-            self.sell(sell_price, abs(self.pos), True)
+            self.sell(sell_price, abs(self.pos)*0.25, True)
 
         elif self.pos < 0:
             self.send_short_orders(self.short_entry)
 
             cover_price = min(self.short_stop, self.exit_up)
-            self.cover(cover_price, abs(self.pos), True)
+            self.cover(cover_price, abs(self.pos)*0.25, True)
 
         self.put_event()
 
@@ -111,10 +111,10 @@ class TurtleSignalStrategy(CtaTemplate):
         """
         if trade.direction == Direction.LONG:
             self.long_entry = trade.price
-            self.long_stop = self.long_entry - 2 * self.atr_value
+            self.long_stop = self.long_entry - 0.5 * self.atr_value
         else:
             self.short_entry = trade.price
-            self.short_stop = self.short_entry + 2 * self.atr_value
+            self.short_stop = self.short_entry + 0.5 * self.atr_value
 
     def on_order(self, order: OrderData):
         """
