@@ -63,6 +63,7 @@ class OrderType(Enum):
     STOP = "STOP"
     FAK = "FAK"
     FOK = "FOK"
+    LIGHT="闪电"
 
 
 class OptionType(Enum):

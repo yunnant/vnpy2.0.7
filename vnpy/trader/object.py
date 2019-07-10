@@ -5,7 +5,7 @@ Basic data structure used for general trading function in VN Trader.
 from dataclasses import dataclass
 from datetime import datetime
 from logging import INFO
-
+from user.dingding_tsmn import dingRobot
 from .constant import Direction, Exchange, Interval, Offset, Status, Product, OptionType, OrderType
 
 ACTIVE_STATUSES = set([Status.SUBMITTING, Status.NOTTRADED, Status.PARTTRADED])
@@ -14,7 +14,7 @@ ACTIVE_STATUSES = set([Status.SUBMITTING, Status.NOTTRADED, Status.PARTTRADED])
 @dataclass
 class BaseData:
     """
-    Any data object needs a gateway_name as source 
+    Any data object needs a gateway_name as source
     and should inherit base data.
     """
 
@@ -102,7 +102,7 @@ class BarData(BaseData):
 @dataclass
 class OrderData(BaseData):
     """
-    Order data contains information for tracking lastest status 
+    Order data contains information for tracking lastest status
     of a specific order.
     """
 
@@ -220,7 +220,9 @@ class LogData(BaseData):
     def __post_init__(self):
         """"""
         self.time = datetime.now()
-
+        #msgcontent=self.time.strftime('%Y-%m-%d %H:%M:%S')+" "+self.msg
+        #ddRobot = dingRobot()
+        #ddRobot.postStart(msgcontent)
 
 @dataclass
 class ContractData(BaseData):
