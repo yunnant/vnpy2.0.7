@@ -23,8 +23,8 @@ class EngineType(Enum):
 
 
 class BacktestingMode(Enum):
-    BAR = 1
-    TICK = 2
+    BAR = "BAR"
+    TICK = "TICK"
 
 
 @dataclass

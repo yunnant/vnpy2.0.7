@@ -9,6 +9,9 @@ from ..engine import (
     EVENT_BACKTESTER_OPTIMIZATION_FINISHED,
     OptimizationSetting
 )
+from ...cta_strategy.base import (
+    BacktestingMode)
+
 from vnpy.trader.constant import Interval
 from vnpy.trader.engine import MainEngine
 from vnpy.trader.ui import QtCore, QtWidgets, QtGui
@@ -57,11 +60,15 @@ class BacktesterManager(QtWidgets.QWidget):
         self.class_combo = QtWidgets.QComboBox()
         self.class_combo.addItems(self.class_names)
 
-        self.symbol_line = QtWidgets.QLineEdit("IF88.CFFEX")
+        self.symbol_line = QtWidgets.QLineEdit("BTCUSD.CME")
 
         self.interval_combo = QtWidgets.QComboBox()
         for inteval in Interval:
             self.interval_combo.addItem(inteval.value)
+
+        self.BacktestingMode_combo = QtWidgets.QComboBox()
+        for backtestingmode in BacktestingMode:
+            self.BacktestingMode_combo.addItem(backtestingmode.value)
 
         end_dt = datetime.now()
         start_dt = end_dt - timedelta(days=3 * 365)
@@ -123,6 +130,7 @@ class BacktesterManager(QtWidgets.QWidget):
         form.addRow("交易策略", self.class_combo)
         form.addRow("本地代码", self.symbol_line)
         form.addRow("K线周期", self.interval_combo)
+        form.addRow("回测模式", self.BacktestingMode_combo)
         form.addRow("开始日期", self.start_date_edit)
         form.addRow("结束日期", self.end_date_edit)
         form.addRow("手续费率", self.rate_line)
@@ -229,6 +237,7 @@ class BacktesterManager(QtWidgets.QWidget):
         class_name = self.class_combo.currentText()
         vt_symbol = self.symbol_line.text()
         interval = self.interval_combo.currentText()
+        backtestingmode = self.BacktestingMode_combo.currentText()
         start = self.start_date_edit.date().toPyDate()
         end = self.end_date_edit.date().toPyDate()
         rate = float(self.rate_line.text())
@@ -236,6 +245,11 @@ class BacktesterManager(QtWidgets.QWidget):
         size = float(self.size_line.text())
         pricetick = float(self.pricetick_line.text())
         capital = float(self.capital_line.text())
+
+        if backtestingmode =="BAR":
+                backtestingmode = BacktestingMode.BAR
+        else:
+                backtestingmode = BacktestingMode.TICK
 
         old_setting = self.settings[class_name]
         dialog = BacktestingSettingEditor(class_name, old_setting)
@@ -250,6 +264,7 @@ class BacktesterManager(QtWidgets.QWidget):
             class_name,
             vt_symbol,
             interval,
+            backtestingmode,
             start,
             end,
             rate,
@@ -277,6 +292,7 @@ class BacktesterManager(QtWidgets.QWidget):
         class_name = self.class_combo.currentText()
         vt_symbol = self.symbol_line.text()
         interval = self.interval_combo.currentText()
+        backtestingmode = self.BacktestingMode_combo.currentText()
         start = self.start_date_edit.date().toPyDate()
         end = self.end_date_edit.date().toPyDate()
         rate = float(self.rate_line.text())
@@ -284,6 +300,11 @@ class BacktesterManager(QtWidgets.QWidget):
         size = float(self.size_line.text())
         pricetick = float(self.pricetick_line.text())
         capital = float(self.capital_line.text())
+
+        if backtestingmode =="BAR":
+                backtestingmode = BacktestingMode.BAR
+        else:
+                backtestingmode = BacktestingMode.TICK
 
         parameters = self.settings[class_name]
         dialog = OptimizationSettingEditor(class_name, parameters)
@@ -298,6 +319,7 @@ class BacktesterManager(QtWidgets.QWidget):
             class_name,
             vt_symbol,
             interval,
+            backtestingmode,
             start,
             end,
             rate,

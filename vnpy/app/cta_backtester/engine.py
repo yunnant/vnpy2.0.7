@@ -120,6 +120,7 @@ class BacktesterEngine(BaseEngine):
         class_name: str,
         vt_symbol: str,
         interval: str,
+        backtestingmode: str,
         start: datetime,
         end: datetime,
         rate: float,
@@ -139,6 +140,7 @@ class BacktesterEngine(BaseEngine):
         engine.set_parameters(
             vt_symbol=vt_symbol,
             interval=interval,
+            mode=backtestingmode,
             start=start,
             end=end,
             rate=rate,
@@ -147,7 +149,6 @@ class BacktesterEngine(BaseEngine):
             pricetick=pricetick,
             capital=capital
         )
-
         strategy_class = self.classes[class_name]
         engine.add_strategy(
             strategy_class,
@@ -171,6 +172,7 @@ class BacktesterEngine(BaseEngine):
         class_name: str,
         vt_symbol: str,
         interval: str,
+        backtestingmode: str,
         start: datetime,
         end: datetime,
         rate: float,
@@ -191,6 +193,7 @@ class BacktesterEngine(BaseEngine):
                 class_name,
                 vt_symbol,
                 interval,
+                backtestingmode,
                 start,
                 end,
                 rate,
@@ -227,6 +230,7 @@ class BacktesterEngine(BaseEngine):
         class_name: str,
         vt_symbol: str,
         interval: str,
+        backtestingmode: str,
         start: datetime,
         end: datetime,
         rate: float,
@@ -251,6 +255,7 @@ class BacktesterEngine(BaseEngine):
         engine.set_parameters(
             vt_symbol=vt_symbol,
             interval=interval,
+            mode=backtestingmode,
             start=start,
             end=end,
             rate=rate,
@@ -290,6 +295,7 @@ class BacktesterEngine(BaseEngine):
         class_name: str,
         vt_symbol: str,
         interval: str,
+        backtestingmode: str,
         start: datetime,
         end: datetime,
         rate: float,
@@ -311,6 +317,7 @@ class BacktesterEngine(BaseEngine):
                 class_name,
                 vt_symbol,
                 interval,
+                backtestingmode,
                 start,
                 end,
                 rate,
