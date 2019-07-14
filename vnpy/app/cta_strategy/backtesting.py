@@ -213,6 +213,7 @@ class BacktestingEngine:
 
         if not self.end:
             self.end = datetime.now()
+
         if self.start >= self.end:
             self.output("起始日期必须小于结束日期")
             return
@@ -227,10 +228,10 @@ class BacktestingEngine:
         end = self.start + progress_delta
         progress = 0
 
-
         while start < self.end:
-            if self.mode == BacktestingMode.BAR:
+            end = min(end, self.end)  # Make sure end time stays within set range
 
+            if self.mode == BacktestingMode.BAR:
                 data = load_bar_data(
                     self.symbol,
                     self.exchange,
@@ -255,7 +256,7 @@ class BacktestingEngine:
 
             start = end
             end += progress_delta
-        #print(self.history_data)
+
         self.output(f"历史数据加载完成，数据量：{len(self.history_data)}")
 
     def run_backtesting(self):
@@ -270,18 +271,15 @@ class BacktestingEngine:
         # Use the first [days] of history data for initializing strategy
         day_count = 0
         ix = 0
-        #print(self.history_data)
+
         for ix, data in enumerate(self.history_data):
-            #print(ix,data)
             if self.datetime and data.datetime.day != self.datetime.day:
                 day_count += 1
                 if day_count >= self.days:
                     break
 
             self.datetime = data.datetime
-            #print(data)
-            #print(self.datetime)
-            break#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            break#!!!!!!!!!!!!!!!
             self.callback(data)
 
         self.strategy.inited = True
@@ -293,7 +291,6 @@ class BacktestingEngine:
 
         # Use the rest of history data for running backtesting
         for data in self.history_data[ix:]:
-            #print(data)
             func(data)
 
         self.output("历史数据回放结束")
@@ -710,7 +707,7 @@ class BacktestingEngine:
         self.cross_limit_order()
         self.cross_stop_order()
         self.strategy.on_bar(bar)
-        #print(bar.close_price)
+
         self.update_daily_close(bar.close_price)
 
     def new_tick(self, tick: TickData):
@@ -1019,6 +1016,12 @@ class BacktestingEngine:
         """
         pass
 
+    def sync_strategy_data(self, strategy: CtaTemplate):
+        """
+        Sync strategy data into json file.
+        """
+        pass
+
     def get_engine_type(self):
         """
         Return engine type.
@@ -1195,7 +1198,7 @@ def ga_optimize(parameter_values: list):
     return _ga_optimize(tuple(parameter_values))
 
 
-@lru_cache(maxsize=10)
+@lru_cache(maxsize=999)
 def load_bar_data(
     symbol: str,
     exchange: Exchange,
@@ -1209,7 +1212,7 @@ def load_bar_data(
     )
 
 
-@lru_cache(maxsize=10)
+@lru_cache(maxsize=999)
 def load_tick_data(
     symbol: str,
     exchange: Exchange,
