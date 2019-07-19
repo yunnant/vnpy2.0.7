@@ -1094,7 +1094,7 @@ def create_signature(api_key, method, host, path, secret_key, get_params=None):
     payload = [method, host, path, encode_params]
     payload = "\n".join(payload)
     payload = payload.encode(encoding="UTF8")
-
+    
     secret_key = secret_key.encode(encoding="UTF8")
 
     digest = hmac.new(secret_key, payload, digestmod=hashlib.sha256).digest()
