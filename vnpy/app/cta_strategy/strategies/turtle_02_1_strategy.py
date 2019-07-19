@@ -16,12 +16,6 @@ am_size设置最大为50，载入am数大于50需重新修改
 30,30,5,6 9237% 1.06 128 84.9
 20,10,40,24 6883% 1.12 98 63
 5,30,10,12 6748% 1.12 89 62
-
-15，15，5，12，6864
-6，30，6，6
-30，30，5，6
-25，10，20，18 7021
-20，10，40，24 6849%
 #更新内容
 0.21：初始化完成后可选择立即启动，时间间隔可自选，状态推送
 
@@ -53,7 +47,6 @@ class Turtle02Strategy(CtaTemplate):
     atr_window = 14
     fixed_size = 1
     candle_interval=24
-    start_immediately_once_inited=0
 
     entry_up = 0
     entry_down = 0
@@ -66,8 +59,8 @@ class Turtle02Strategy(CtaTemplate):
     long_stop = 0
     short_stop = 0
 
-    parameters = ["entry_window", "exit_window", "atr_window", "fixed_size","candle_interval","start_immediately_once_inited"]
-    variables = ["entry_up", "entry_down", "exit_up", "exit_down", "atr_value","short_stop","long_stop"]
+    parameters = ["entry_window", "exit_window", "atr_window", "fixed_size","candle_interval"]
+    variables = ["entry_up", "entry_down", "exit_up", "exit_down", "atr_value"]
 
     def __init__(self, cta_engine, strategy_name, vt_symbol, setting):
         """"""
@@ -76,7 +69,7 @@ class Turtle02Strategy(CtaTemplate):
         )
 
         self.bg = BarGenerator(self.on_bar,self.candle_interval,self.on_nhour_bar,Interval.HOUR)
-        self.bg1 = BarGenerator(self.on_bar,1,self.on_1hour_bar,Interval.HOUR)
+        #self.bg1 = BarGenerator(self.on_bar,1,self.on_1hour_bar,Interval.HOUR)
 
         self.am = ArrayManager(size=50)
 
@@ -92,7 +85,7 @@ class Turtle02Strategy(CtaTemplate):
         Callback when strategy is started.
         """
         self.write_log("策略启动")
-        self.start_immediately_once_inited=2
+
 
     def on_stop(self):
         """
@@ -118,9 +111,8 @@ class Turtle02Strategy(CtaTemplate):
         """
         Callback of new bar data update.
         """
-        if self.start_immediately_once_inited==2:
-            self.count += 1
-            self.write_log("目前正常运行"+str(self.count)+"小时，请关注下个小时状态更新")
+        self.count += 1
+        #self.write_log("目前正常运行"+str(self.count)+"小时，请关注下个小时状态更新")
 
     def on_nhour_bar(self, bar: BarData):
         """
@@ -134,14 +126,9 @@ class Turtle02Strategy(CtaTemplate):
         if not self.am.inited:
             return
 
-        if self.start_immediately_once_inited==1:
-            self.on_start()
-            self.trading=True
-            self.start_immediately_once_inited=2
-
         self.entry_up, self.entry_down = self.am.donchian(self.entry_window)
         self.exit_up, self.exit_down = self.am.donchian(self.exit_window)
-        self.write_log("参数监控: enup "+str(self.entry_up)+" endo "+str(self.entry_down)+" exup "+str(self.exit_up)+" exdo "+str(self.exit_down))
+        #self.write_log("参数监控: enup "+str(self.entry_up)+" endo "+str(self.entry_down)+" exup "+str(self.exit_up)+" exdo "+str(self.exit_down))
         if not self.pos:
             self.atr_value = self.am.atr(self.atr_window)
             self.long_entry = 0
@@ -204,7 +191,7 @@ class Turtle02Strategy(CtaTemplate):
 
         if t < 4:
             self.buy(price + self.atr_value * 1.5, self.fixed_size, True)
-        self.write_log("buy order "+str(price))
+        #self.write_log("buy order "+str(price))
     def send_short_orders(self, price):
         """"""
         t = self.pos / self.fixed_size
@@ -220,4 +207,4 @@ class Turtle02Strategy(CtaTemplate):
 
         if t > -4:
             self.short(price - self.atr_value * 1.5, self.fixed_size, True)
-        self.write_log("sell order "+str(price))
+        #self.write_log("sell order "+str(price))

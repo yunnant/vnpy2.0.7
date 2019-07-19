@@ -1,5 +1,5 @@
 '''
-#Track 逐波踏浪0.3
+#Track 逐波踏浪0.4
 
 #限制条件
 手续费0.0003
@@ -33,9 +33,10 @@ from vnpy.app.cta_strategy import (
 )
 from ..base import (
     EngineType)
+from vnpy.trader.constant import Interval, Direction, Offset
 import numpy as np
 ########################################################################
-class Track03Strategy(CtaTemplate):
+class Track04Strategy(CtaTemplate):
     """基于Tick的交易策略"""
     className = 'Track03Strategy'
     author = '南石资本'
@@ -52,27 +53,31 @@ class Track03Strategy(CtaTemplate):
     losestop=0.0005
     slip=0.001
     decimal=3
+    contract_value_crypto=0
 
 
     # 策略变量
     posPrice = 0
     orderable=True
+    performance=[0.0,0.0]
+    traded=0
+    history=[0.0]
 
     # 参数列表，保存了参数的名称
-    parameters = ["pricechange_order","pricechange_stop","volumechange","interval_order","interval_stop","losestop","fixed_size","slip","decimal"]
+    parameters = ["pricechange_order","pricechange_stop","volumechange","interval_order","interval_stop","losestop","fixed_size","slip","decimal","contract_value_crypto"]
 
     # 变量列表，保存了变量的名称
-    variables = ["posPrice","orderable"]
+    variables = ["posPrice","orderable","performance","traded"]
 
 
     # ----------------------------------------------------------------------
     def __init__(self, cta_engine, strategy_name, vt_symbol, setting):
         """Constructor"""
 
-        super(Track03Strategy, self).__init__(cta_engine, strategy_name, vt_symbol, setting)
+        super(Track04Strategy, self).__init__(cta_engine, strategy_name, vt_symbol, setting)
 
         #创建Array队列
-        #self.bg = BarGenerator(self.on_bar)
+        self.bg1 = BarGenerator(self.on_bar,24,self.on_performance,Interval.HOUR)
         self.ta = TickArrayManager(size=2,interval=-1)
         self.ta1 = TickArrayManager(size=2,interval=self.interval_order)
         self.ta2 = TickArrayManager(size=2,interval=self.interval_stop)
@@ -111,6 +116,8 @@ class Track03Strategy(CtaTemplate):
     # ----------------------------------------------------------------------
     def on_tick(self, tick: TickData):
         """收到行情TICK推送（必须由用户继承实现）"""
+
+        self.bg1.update_tick(tick)
 
         self.cancel_all()
 
@@ -160,14 +167,17 @@ class Track03Strategy(CtaTemplate):
     # ----------------------------------------------------------------------
     def on_bar(self, bar: BarData):
         """收到Bar推送（必须由用户继承实现）"""
+        self.bg1.update_bar(bar)
 
     # ----------------------------------------------------------------------
-    def on_1hour_bar(self, bar: BarData):
+    def on_performance(self, bar: BarData):
         """
         Callback of new bar data update.
         """
-        self.write_log("目前运行正常，请关注下个小时状态更新")
-
+        #self.write_log("累计交易"+str(self.traded)+"单位，"+"累计法币毛盈利"+str(self.performance[0]))
+        self.history.append(self.performance[0])
+        with open(str(self.strategy_name)+".txt","w") as f:
+            f.write(str(self.history))
 
     # ----------------------------------------------------------------------
     def on_order(self, order: OrderData):
@@ -184,6 +194,20 @@ class Track03Strategy(CtaTemplate):
         """
 
         self.posPrice = trade.price
+        a={Direction.LONG:-1,Direction.SHORT:1}
+        b={Offset.OPEN:-1,Offset.CLOSE:1}
+        if self.contract_value_crypto!=0:
+            add=trade.volume/trade.price*a[trade.direction]*b[trade.offset]*self.contract_value_crypto
+        else:
+            add=trade.volume*trade.price*b[trade.offset]
+
+        if self.pos!=0:
+            self.performance[1]=add
+        else:
+            self.performance[0]+=(self.performance[1]+add)*trade.price#将盈利转为法币
+            self.performance[1]=0
+
+        self.traded+=trade.volume
 
     # ----------------------------------------------------------------------
     def on_stop_order(self, stop_order: StopOrder):

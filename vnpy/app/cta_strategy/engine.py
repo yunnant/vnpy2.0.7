@@ -23,17 +23,17 @@ from vnpy.trader.object import (
     ContractData
 )
 from vnpy.trader.event import (
-    EVENT_TICK, 
-    EVENT_ORDER, 
+    EVENT_TICK,
+    EVENT_ORDER,
     EVENT_TRADE,
     EVENT_POSITION
 )
 from vnpy.trader.constant import (
-    Direction, 
-    OrderType, 
-    Interval, 
-    Exchange, 
-    Offset, 
+    Direction,
+    OrderType,
+    Interval,
+    Exchange,
+    Offset,
     Status
 )
 from vnpy.trader.utility import load_json, save_json, extract_vt_symbol, round_to
@@ -164,7 +164,7 @@ class CtaEngine(BaseEngine):
     def process_order_event(self, event: Event):
         """"""
         order = event.data
-        
+
         self.offset_converter.update_order(order)
 
         strategy = self.orderid_strategy_map.get(order.vt_orderid, None)
@@ -189,7 +189,7 @@ class CtaEngine(BaseEngine):
                 status=STOP_STATUS_MAP[order.status],
                 vt_orderids=[order.vt_orderid],
             )
-            self.call_strategy_func(strategy, strategy.on_stop_order, so)  
+            self.call_strategy_func(strategy, strategy.on_stop_order, so)
 
         # Call strategy on_order function
         self.call_strategy_func(strategy, strategy.on_order, order)
@@ -258,15 +258,15 @@ class CtaEngine(BaseEngine):
                         price = tick.limit_down
                     else:
                         price = tick.bid_price_5
-                
+
                 contract = self.main_engine.get_contract(stop_order.vt_symbol)
 
                 vt_orderids = self.send_limit_order(
-                    strategy, 
+                    strategy,
                     contract,
-                    stop_order.direction, 
-                    stop_order.offset, 
-                    price, 
+                    stop_order.direction,
+                    stop_order.offset,
+                    price,
                     stop_order.volume,
                     stop_order.lock
                 )
@@ -326,13 +326,13 @@ class CtaEngine(BaseEngine):
             vt_orderids.append(vt_orderid)
 
             self.offset_converter.update_order_request(req, vt_orderid)
-            
+
             # Save relationship between orderid and strategy.
             self.orderid_strategy_map[vt_orderid] = strategy
             self.strategy_orderid_map[strategy.strategy_name].add(vt_orderid)
 
         return vt_orderids
-    
+
     def send_limit_order(
         self,
         strategy: CtaTemplate,
@@ -356,7 +356,7 @@ class CtaEngine(BaseEngine):
             OrderType.LIMIT,
             lock
         )
-    
+
     def send_server_stop_order(
         self,
         strategy: CtaTemplate,
@@ -369,8 +369,8 @@ class CtaEngine(BaseEngine):
     ):
         """
         Send a stop order to server.
-        
-        Should only be used if stop order supported 
+
+        Should only be used if stop order supported
         on the trading server.
         """
         return self.send_server_order(
@@ -470,11 +470,13 @@ class CtaEngine(BaseEngine):
         if not contract:
             self.write_log(f"委托失败，找不到合约：{strategy.vt_symbol}", strategy)
             return ""
-        
+
         # Round order price and volume to nearest incremental value
-        price = round_to(price, contract.pricetick)
-        volume = round_to(volume, contract.min_volume)
-        
+
+        #price = round_to(price, contract.pricetick)
+
+        #volume = round_to(volume, contract.min_volume)
+
         if stop:
             if contract.stop_supported:
                 return self.send_server_stop_order(strategy, contract, direction, offset, price, volume, lock)
@@ -507,9 +509,9 @@ class CtaEngine(BaseEngine):
         return self.engine_type
 
     def load_bar(
-        self, 
-        vt_symbol: str, 
-        days: int, 
+        self,
+        vt_symbol: str,
+        days: int,
         interval: Interval,
         callback: Callable[[BarData], None]
     ):
@@ -533,7 +535,7 @@ class CtaEngine(BaseEngine):
             callback(bar)
 
     def load_tick(
-        self, 
+        self,
         vt_symbol: str,
         days: int,
         callback: Callable[[TickData], None]
@@ -601,7 +603,7 @@ class CtaEngine(BaseEngine):
     def init_strategy(self, strategy_name: str):
         """
         Init a strategy.
-        """ 
+        """
         self.init_queue.put(strategy_name)
 
         if not self.init_thread:
@@ -646,7 +648,7 @@ class CtaEngine(BaseEngine):
             strategy.inited = True
             self.put_strategy_event(strategy)
             self.write_log(f"{strategy_name}初始化完成")
-        
+
         self.init_thread = None
 
     def start_strategy(self, strategy_name: str):
@@ -835,9 +837,9 @@ class CtaEngine(BaseEngine):
 
         for strategy_name, strategy_config in self.strategy_setting.items():
             self.add_strategy(
-                strategy_config["class_name"], 
+                strategy_config["class_name"],
                 strategy_name,
-                strategy_config["vt_symbol"], 
+                strategy_config["vt_symbol"],
                 strategy_config["setting"]
             )
 
