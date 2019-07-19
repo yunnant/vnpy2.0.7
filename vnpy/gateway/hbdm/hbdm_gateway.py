@@ -58,12 +58,14 @@ STATUS_HBDM2VT = {
 ORDERTYPE_VT2HBDM = {
     OrderType.MARKET: "opponent",
     OrderType.LIMIT: "limit",
-    OrderType.LIGHT: "flash",
+    OrderType.LIGHT: "lighting",
+    OrderType.OPTIMAL_5: "optimal_5"
 }
 ORDERTYPE_HBDM2VT = {v: k for k, v in ORDERTYPE_VT2HBDM.items()}
 ORDERTYPE_HBDM2VT[1] = OrderType.LIMIT
 ORDERTYPE_HBDM2VT[3] = OrderType.MARKET
 ORDERTYPE_HBDM2VT[4] = OrderType.LIGHT
+ORDERTYPE_HBDM2VT[7] = OrderType.OPTIMAL_5
 
 DIRECTION_VT2HBDM = {
     Direction.LONG: "buy",
@@ -1024,13 +1026,18 @@ class HbdmDataWebsocketApi(HbdmWebsocketApiBase):
         tick = self.ticks[ws_symbol]
         tick.datetime = datetime.fromtimestamp(data["ts"] / 1000)
 
-        bids = data["tick"]["bids"]
+        tick_data = data["tick"]
+        if "bids" not in tick_data or "asks" not in tick_data:
+            print(data)
+            return
+
+        bids = tick_data["bids"]
         for n in range(5):
             price, volume = bids[n]
             tick.__setattr__("bid_price_" + str(n + 1), float(price))
             tick.__setattr__("bid_volume_" + str(n + 1), float(volume))
 
-        asks = data["tick"]["asks"]
+        asks = tick_data["asks"]
         for n in range(5):
             price, volume = asks[n]
             tick.__setattr__("ask_price_" + str(n + 1), float(price))

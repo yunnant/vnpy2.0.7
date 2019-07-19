@@ -64,6 +64,7 @@ class OrderType(Enum):
     FAK = "FAK"
     FOK = "FOK"
     LIGHT="闪电"
+    OPTIMAL_5="最优5档"
 
 
 class OptionType(Enum):

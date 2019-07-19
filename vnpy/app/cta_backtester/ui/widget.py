@@ -84,11 +84,11 @@ class BacktesterManager(QtWidgets.QWidget):
             QtCore.QDate.currentDate()
         )
 
-        self.rate_line = QtWidgets.QLineEdit("0.000025")
+        self.rate_line = QtWidgets.QLineEdit("0.00025")
         self.slippage_line = QtWidgets.QLineEdit("0.2")
-        self.size_line = QtWidgets.QLineEdit("300")
+        self.size_line = QtWidgets.QLineEdit("1")
         self.pricetick_line = QtWidgets.QLineEdit("0.2")
-        self.capital_line = QtWidgets.QLineEdit("1000000")
+        self.capital_line = QtWidgets.QLineEdit("1000")
 
         backtesting_button = QtWidgets.QPushButton("开始回测")
         backtesting_button.clicked.connect(self.start_backtesting)
@@ -314,6 +314,7 @@ class BacktesterManager(QtWidgets.QWidget):
 
         optimization_setting, use_ga = dialog.get_setting()
         self.target_display = dialog.target_display
+        self.write_log("参数范围 "+str(optimization_setting.params))
 
         self.backtester_engine.start_optimization(
             class_name,

@@ -149,6 +149,7 @@ class BacktesterEngine(BaseEngine):
             pricetick=pricetick,
             capital=capital
         )
+        
         strategy_class = self.classes[class_name]
         engine.add_strategy(
             strategy_class,
