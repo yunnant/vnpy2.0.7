@@ -273,6 +273,7 @@ class BacktesterEngine(BaseEngine):
         )
 
         if use_ga:
+            engine.load_data()
             self.result_values = engine.run_ga_optimization(
                 optimization_setting,
                 output=False
