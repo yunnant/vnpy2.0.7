@@ -9,6 +9,7 @@ from ..engine import (
     EVENT_BACKTESTER_OPTIMIZATION_FINISHED,
     OptimizationSetting
 )
+from ...cta_strategy.base import BacktestingMode
 from vnpy.trader.constant import Interval, Direction
 from vnpy.trader.engine import MainEngine
 from vnpy.trader.ui import QtCore, QtWidgets, QtGui
@@ -63,6 +64,10 @@ class BacktesterManager(QtWidgets.QWidget):
         self.interval_combo = QtWidgets.QComboBox()
         for inteval in Interval:
             self.interval_combo.addItem(inteval.value)
+
+        self.BacktestingMode_combo = QtWidgets.QComboBox()
+        for backtestingmode in BacktestingMode:
+            self.BacktestingMode_combo.addItem(backtestingmode.value)
 
         end_dt = datetime.now()
         start_dt = end_dt - timedelta(days=3 * 365)
@@ -129,6 +134,7 @@ class BacktesterManager(QtWidgets.QWidget):
         form.addRow("交易策略", self.class_combo)
         form.addRow("本地代码", self.symbol_line)
         form.addRow("K线周期", self.interval_combo)
+        form.addRow("回测模式", self.BacktestingMode_combo)
         form.addRow("开始日期", self.start_date_edit)
         form.addRow("结束日期", self.end_date_edit)
         form.addRow("手续费率", self.rate_line)
@@ -240,6 +246,7 @@ class BacktesterManager(QtWidgets.QWidget):
         class_name = self.class_combo.currentText()
         vt_symbol = self.symbol_line.text()
         interval = self.interval_combo.currentText()
+        backtestingmode = self.BacktestingMode_combo.currentText()
         start = self.start_date_edit.date().toPyDate()
         end = self.end_date_edit.date().toPyDate()
         rate = float(self.rate_line.text())
@@ -247,6 +254,11 @@ class BacktesterManager(QtWidgets.QWidget):
         size = float(self.size_line.text())
         pricetick = float(self.pricetick_line.text())
         capital = float(self.capital_line.text())
+
+        if backtestingmode =="BAR":
+                backtestingmode = BacktestingMode.BAR
+        else:
+                backtestingmode = BacktestingMode.TICK
 
         old_setting = self.settings[class_name]
         dialog = BacktestingSettingEditor(class_name, old_setting)
@@ -261,6 +273,7 @@ class BacktesterManager(QtWidgets.QWidget):
             class_name,
             vt_symbol,
             interval,
+            backtestingmode,
             start,
             end,
             rate,
@@ -290,6 +303,7 @@ class BacktesterManager(QtWidgets.QWidget):
         class_name = self.class_combo.currentText()
         vt_symbol = self.symbol_line.text()
         interval = self.interval_combo.currentText()
+        backtestingmode = self.BacktestingMode_combo.currentText()
         start = self.start_date_edit.date().toPyDate()
         end = self.end_date_edit.date().toPyDate()
         rate = float(self.rate_line.text())
@@ -297,6 +311,11 @@ class BacktesterManager(QtWidgets.QWidget):
         size = float(self.size_line.text())
         pricetick = float(self.pricetick_line.text())
         capital = float(self.capital_line.text())
+
+        if backtestingmode =="BAR":
+                backtestingmode = BacktestingMode.BAR
+        else:
+                backtestingmode = BacktestingMode.TICK
 
         parameters = self.settings[class_name]
         dialog = OptimizationSettingEditor(class_name, parameters)
@@ -311,6 +330,7 @@ class BacktesterManager(QtWidgets.QWidget):
             class_name,
             vt_symbol,
             interval,
+            backtestingmode,
             start,
             end,
             rate,
@@ -1013,13 +1033,13 @@ class CandleChartDialog(QtWidgets.QDialog):
     def update_trades(self, trades: list):
         """"""
         trade_data = []
-        
+
         for trade in trades:
             ix = self.dt_ix_map[trade.datetime]
 
             scatter = {
-                "pos": (ix, trade.price), 
-                "data": 1, 
+                "pos": (ix, trade.price),
+                "data": 1,
                 "size": 14,
                 "pen": pg.mkPen((255, 255, 255))
             }
@@ -1030,11 +1050,11 @@ class CandleChartDialog(QtWidgets.QDialog):
             else:
                 scatter["symbol"] = "t"
                 scatter["brush"] = pg.mkBrush((0, 0, 255))
-            
+
             trade_data.append(scatter)
 
         self.trade_scatter.setData(trade_data)
-        
+
     def clear_data(self):
         """"""
         self.updated = False
@@ -1042,7 +1062,7 @@ class CandleChartDialog(QtWidgets.QDialog):
 
         self.dt_ix_map.clear()
         self.trade_scatter.clear()
-    
+
     def is_updated(self):
         """"""
         return self.updated
