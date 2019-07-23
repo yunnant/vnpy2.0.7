@@ -243,6 +243,7 @@ class BacktesterEngine(BaseEngine):
         use_ga: bool
     ):
         """"""
+        self.write_log("参数范围"+str(optimization_setting.params))
         if use_ga:
             self.write_log("开始遗传算法参数优化")
         else:
