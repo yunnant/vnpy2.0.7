@@ -108,12 +108,12 @@ class HbdmGateway(BaseGateway):
         "代理端口": "",
     }
 
-    exchanges = [Exchange.HUOBI]
 
-    def __init__(self, event_engine):
+
+    def __init__(self,event_engine,gatewayname,exchangeusr):
         """Constructor"""
-        super().__init__(event_engine, "HBDM")
-
+        super().__init__(event_engine, gatewayname)
+        exec(exchangeusr)
         self.rest_api = HbdmRestApi(self)
         self.trade_ws_api = HbdmTradeWebsocketApi(self)
         self.market_ws_api = HbdmDataWebsocketApi(self)
@@ -198,6 +198,7 @@ class HbdmRestApi(RestClient):
 
         self.gateway = gateway
         self.gateway_name = gateway.gateway_name
+        self.exchange=gateway.exchanges[0]
 
         self.host = ""
         self.key = ""
@@ -535,7 +536,7 @@ class HbdmRestApi(RestClient):
             if not position:
                 position = PositionData(
                     symbol=d["contract_code"],
-                    exchange=Exchange.HUOBI,
+                    exchange=self.exchange,
                     direction=DIRECTION_HBDM2VT[d["direction"]],
                     gateway_name=self.gateway_name
                 )
@@ -567,7 +568,7 @@ class HbdmRestApi(RestClient):
             order = OrderData(
                 orderid=orderid,
                 symbol=d["contract_code"],
-                exchange=Exchange.HUOBI,
+                exchange=self.exchange,
                 price=d["price"],
                 volume=d["volume"],
                 type=ORDERTYPE_HBDM2VT[d["order_price_type"]],
@@ -597,7 +598,7 @@ class HbdmRestApi(RestClient):
             order = OrderData(
                 orderid=orderid,
                 symbol=d["contract_code"],
-                exchange=Exchange.HUOBI,
+                exchange=self.exchange,
                 price=d["price"],
                 volume=d["volume"],
                 type=ORDERTYPE_HBDM2VT[d["order_price_type"]],
@@ -625,7 +626,7 @@ class HbdmRestApi(RestClient):
                 tradeid=d["match_id"],
                 orderid=d["order_id"],
                 symbol=d["contract_code"],
-                exchange=Exchange.HUOBI,
+                exchange=self.exchange,
                 price=d["trade_price"],
                 volume=d["trade_volume"],
                 direction=DIRECTION_HBDM2VT[d["direction"]],
@@ -647,7 +648,7 @@ class HbdmRestApi(RestClient):
 
             contract = ContractData(
                 symbol=d["contract_code"],
-                exchange=Exchange.HUOBI,
+                exchange=self.exchange,
                 name=d["contract_code"],
                 pricetick=d["price_tick"],
                 size=int(d["contract_size"]),
@@ -777,6 +778,7 @@ class HbdmWebsocketApiBase(WebsocketClient):
 
         self.gateway = gateway
         self.gateway_name = gateway.gateway_name
+        self.exchange=gateway.exchanges[0]
 
         self.key = ""
         self.secret = ""
@@ -907,7 +909,7 @@ class HbdmTradeWebsocketApi(HbdmWebsocketApiBase):
 
         order = OrderData(
             symbol=data["contract_code"],
-            exchange=Exchange.HUOBI,
+            exchange=self.exchange,
             orderid=orderid,
             type=ORDERTYPE_HBDM2VT[data["order_price_type"]],
             direction=DIRECTION_HBDM2VT[data["direction"]],
@@ -932,7 +934,7 @@ class HbdmTradeWebsocketApi(HbdmWebsocketApiBase):
 
             trade = TradeData(
                 symbol=order.symbol,
-                exchange=Exchange.HUOBI,
+                exchange=self.exchange,
                 orderid=order.orderid,
                 tradeid=str(d["trade_id"]),
                 direction=order.direction,
@@ -981,7 +983,7 @@ class HbdmDataWebsocketApi(HbdmWebsocketApiBase):
         tick = TickData(
             symbol=req.symbol,
             name=req.symbol,
-            exchange=Exchange.HUOBI,
+            exchange=self.exchange,
             datetime=datetime.now(),
             gateway_name=self.gateway_name,
         )
@@ -1094,7 +1096,7 @@ def create_signature(api_key, method, host, path, secret_key, get_params=None):
     payload = [method, host, path, encode_params]
     payload = "\n".join(payload)
     payload = payload.encode(encoding="UTF8")
-    
+
     secret_key = secret_key.encode(encoding="UTF8")
 
     digest = hmac.new(secret_key, payload, digestmod=hashlib.sha256).digest()

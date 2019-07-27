@@ -63,12 +63,13 @@ class MainEngine:
         self.engines[engine.engine_name] = engine
         return engine
 
-    def add_gateway(self, gateway_class: Type[BaseGateway]):
+    def add_gateway(self, gateway):
         """
         Add gateway.
         """
-        gateway = gateway_class(self.event_engine)
+
         self.gateways[gateway.gateway_name] = gateway
+
 
         # Add gateway supported exchanges into engine
         for exchange in gateway.exchanges:
@@ -293,7 +294,7 @@ class LogEngine(BaseEngine):
 
     def add_file_handler(self):
         """
-        Add file output of log. 
+        Add file output of log.
         """
         today_date = datetime.now().strftime("%Y%m%d")
         filename = f"vt_{today_date}.log"
