@@ -118,6 +118,10 @@ class Exchange(Enum):
     BITFINEX = "BITFINEX"
     BINANCE = "BINANCE"
 
+    #多用户
+    HUOBI_tyn="HUOBI_tyn"
+    HUOBI_gxc="HUOBI_gxc"
+    HUOBI_zby="HUOBI_zby"
 
 class Currency(Enum):
     """
