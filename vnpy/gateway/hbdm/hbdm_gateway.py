@@ -110,10 +110,10 @@ class HbdmGateway(BaseGateway):
 
     exchanges = [Exchange.HUOBI]
 
-    def __init__(self, event_engine):
+    def __init__(self,event_engine,gatewayname,exchangeusr):
         """Constructor"""
-        super().__init__(event_engine, "HBDM")
-
+        super().__init__(event_engine, gatewayname)
+        exec(exchangeusr)
         self.rest_api = HbdmRestApi(self)
         self.trade_ws_api = HbdmTradeWebsocketApi(self)
         self.market_ws_api = HbdmDataWebsocketApi(self)
