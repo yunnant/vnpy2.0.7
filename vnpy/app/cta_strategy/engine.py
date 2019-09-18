@@ -53,7 +53,6 @@ from .base import (
 from .template import CtaTemplate
 
 
-
 STOP_STATUS_MAP = {
     Status.SUBMITTING: StopOrderStatus.WAITING,
     Status.NOTTRADED: StopOrderStatus.WAITING,
@@ -91,6 +90,7 @@ class CtaEngine(BaseEngine):
 
         self.stop_order_count = 0   # for generating stop_orderid
         self.stop_orders = {}       # stop_orderid: stop_order
+
         self.init_executor = ThreadPoolExecutor(max_workers=3)
 
         self.rq_client = None
@@ -475,8 +475,8 @@ class CtaEngine(BaseEngine):
             return ""
 
         # Round order price and volume to nearest incremental value
-        #price = round_to(price, contract.pricetick)
-        #volume = round_to(volume, contract.min_volume)
+        price = round_to(price, contract.pricetick)
+        volume = round_to(volume, contract.min_volume)
 
         if stop:
             if contract.stop_supported:
@@ -762,7 +762,11 @@ class CtaEngine(BaseEngine):
                 if filename.endswith(".py"):
                     strategy_module_name = ".".join(
                         [module_name, filename.replace(".py", "")])
-                    self.load_strategy_class_from_module(strategy_module_name)
+                elif filename.endswith(".pyd"):
+                    strategy_module_name = ".".join(
+                        [module_name, filename.split(".")[0]])
+
+                self.load_strategy_class_from_module(strategy_module_name)
 
     def load_strategy_class_from_module(self, module_name: str):
         """
