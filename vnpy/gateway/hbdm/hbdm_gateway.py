@@ -59,14 +59,13 @@ STATUS_HBDM2VT = {
 ORDERTYPE_VT2HBDM = {
     OrderType.MARKET: "opponent",
     OrderType.LIMIT: "limit",
-    OrderType.LIGHT: "lighting",
-    OrderType.OPTIMAL_5: "optimal_5"
 }
 ORDERTYPE_HBDM2VT = {v: k for k, v in ORDERTYPE_VT2HBDM.items()}
 ORDERTYPE_HBDM2VT[1] = OrderType.LIMIT
 ORDERTYPE_HBDM2VT[3] = OrderType.MARKET
-ORDERTYPE_HBDM2VT[4] = OrderType.LIGHT
-ORDERTYPE_HBDM2VT[7] = OrderType.OPTIMAL_5
+ORDERTYPE_HBDM2VT[4] = OrderType.MARKET
+ORDERTYPE_HBDM2VT[5] = OrderType.STOP
+ORDERTYPE_HBDM2VT[6] = OrderType.LIMIT
 
 DIRECTION_VT2HBDM = {
     Direction.LONG: "buy",
@@ -109,12 +108,12 @@ class HbdmGateway(BaseGateway):
         "代理端口": "",
     }
 
+    exchanges = [Exchange.HUOBI]
 
-
-    def __init__(self,event_engine,gatewayname,exchangeusr):
+    def __init__(self, event_engine):
         """Constructor"""
-        super().__init__(event_engine, gatewayname)
-        exec(exchangeusr)
+        super().__init__(event_engine, "HBDM")
+
         self.rest_api = HbdmRestApi(self)
         self.trade_ws_api = HbdmTradeWebsocketApi(self)
         self.market_ws_api = HbdmDataWebsocketApi(self)
@@ -199,7 +198,6 @@ class HbdmRestApi(RestClient):
 
         self.gateway = gateway
         self.gateway_name = gateway.gateway_name
-        self.exchange=gateway.exchanges[0]
 
         self.host = ""
         self.key = ""
@@ -537,7 +535,7 @@ class HbdmRestApi(RestClient):
             if not position:
                 position = PositionData(
                     symbol=d["contract_code"],
-                    exchange=self.exchange,
+                    exchange=Exchange.HUOBI,
                     direction=DIRECTION_HBDM2VT[d["direction"]],
                     gateway_name=self.gateway_name
                 )
@@ -569,7 +567,7 @@ class HbdmRestApi(RestClient):
             order = OrderData(
                 orderid=orderid,
                 symbol=d["contract_code"],
-                exchange=self.exchange,
+                exchange=Exchange.HUOBI,
                 price=d["price"],
                 volume=d["volume"],
                 type=ORDERTYPE_HBDM2VT[d["order_price_type"]],
@@ -582,7 +580,7 @@ class HbdmRestApi(RestClient):
             )
             self.gateway.on_order(order)
 
-        #self.gateway.write_log(f"{request.extra}活动委托信息查询成功")
+        self.gateway.write_log(f"{request.extra}活动委托信息查询成功")
 
     def on_query_history_order(self, data, request):
         """"""
@@ -599,7 +597,7 @@ class HbdmRestApi(RestClient):
             order = OrderData(
                 orderid=orderid,
                 symbol=d["contract_code"],
-                exchange=self.exchange,
+                exchange=Exchange.HUOBI,
                 price=d["price"],
                 volume=d["volume"],
                 type=ORDERTYPE_HBDM2VT[d["order_price_type"]],
@@ -612,7 +610,7 @@ class HbdmRestApi(RestClient):
             )
             self.gateway.on_order(order)
 
-        #self.gateway.write_log(f"{request.extra}历史委托信息查询成功")
+        self.gateway.write_log(f"{request.extra}历史委托信息查询成功")
 
     def on_query_trade(self, data, request):
         """"""
@@ -627,7 +625,7 @@ class HbdmRestApi(RestClient):
                 tradeid=d["match_id"],
                 orderid=d["order_id"],
                 symbol=d["contract_code"],
-                exchange=self.exchange,
+                exchange=Exchange.HUOBI,
                 price=d["trade_price"],
                 volume=d["trade_volume"],
                 direction=DIRECTION_HBDM2VT[d["direction"]],
@@ -637,7 +635,7 @@ class HbdmRestApi(RestClient):
             )
             self.gateway.on_trade(trade)
 
-        #self.gateway.write_log(f"{request.extra}成交信息查询成功")
+        self.gateway.write_log(f"{request.extra}成交信息查询成功")
 
     def on_query_contract(self, data, request):  # type: (dict, Request)->None
         """"""
@@ -649,7 +647,7 @@ class HbdmRestApi(RestClient):
 
             contract = ContractData(
                 symbol=d["contract_code"],
-                exchange=self.exchange,
+                exchange=Exchange.HUOBI,
                 name=d["contract_code"],
                 pricetick=d["price_tick"],
                 size=int(d["contract_size"]),
@@ -792,7 +790,6 @@ class HbdmWebsocketApiBase(WebsocketClient):
 
         self.gateway = gateway
         self.gateway_name = gateway.gateway_name
-        self.exchange=gateway.exchanges[0]
 
         self.key = ""
         self.secret = ""
@@ -923,7 +920,7 @@ class HbdmTradeWebsocketApi(HbdmWebsocketApiBase):
 
         order = OrderData(
             symbol=data["contract_code"],
-            exchange=self.exchange,
+            exchange=Exchange.HUOBI,
             orderid=orderid,
             type=ORDERTYPE_HBDM2VT[data["order_price_type"]],
             direction=DIRECTION_HBDM2VT[data["direction"]],
@@ -948,7 +945,7 @@ class HbdmTradeWebsocketApi(HbdmWebsocketApiBase):
 
             trade = TradeData(
                 symbol=order.symbol,
-                exchange=self.exchange,
+                exchange=Exchange.HUOBI,
                 orderid=order.orderid,
                 tradeid=str(d["trade_id"]),
                 direction=order.direction,
@@ -997,7 +994,7 @@ class HbdmDataWebsocketApi(HbdmWebsocketApiBase):
         tick = TickData(
             symbol=req.symbol,
             name=req.symbol,
-            exchange=self.exchange,
+            exchange=Exchange.HUOBI,
             datetime=datetime.now(),
             gateway_name=self.gateway_name,
         )
