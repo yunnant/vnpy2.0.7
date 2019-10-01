@@ -8,7 +8,7 @@ from vnpy.trader.ui import MainWindow, create_qapp
 from vnpy.gateway.bitmex import BitmexGateway
 # from vnpy.gateway.futu import FutuGateway
 # from vnpy.gateway.ib import IbGateway
-# from vnpy.gateway.ctp import CtpGateway
+from vnpy.gateway.ctp import CtpGateway
 # from vnpy.gateway.ctptest import CtptestGateway
 # from vnpy.gateway.mini import MiniGateway
 # from vnpy.gateway.sopt import SoptGateway
@@ -29,6 +29,7 @@ from vnpy.gateway.okexs import OkexsGateway
 # from vnpy.gateway.alpaca import AlpacaGateway
 from vnpy.gateway.da import DaGateway
 from vnpy.gateway.coinbase import CoinbaseGateway
+from vnpy.gateway.bitstamp import BitstampGateway
 
 from vnpy.app.cta_strategy import CtaStrategyApp
 # from vnpy.app.csv_loader import CsvLoaderApp
@@ -50,7 +51,7 @@ def main():
     main_engine = MainEngine(event_engine)
 
     # main_engine.add_gateway(BinanceGateway)
-    # main_engine.add_gateway(CtpGateway)
+    main_engine.add_gateway(CtpGateway)
     # main_engine.add_gateway(CtptestGateway)
     # main_engine.add_gateway(MiniGateway)
     # main_engine.add_gateway(SoptGateway)
@@ -73,7 +74,8 @@ def main():
     # main_engine.add_gateway(AlpacaGateway)
     # main_engine.add_gateway(OkexsGateway)
     # main_engine.add_gateway(DaGateway)
-    main_engine.add_gateway(CoinbaseGateway)
+    # main_engine.add_gateway(CoinbaseGateway)
+    main_engine.add_gateway(BitstampGateway)
 
     main_engine.add_app(CtaStrategyApp)
     main_engine.add_app(CtaBacktesterApp)
