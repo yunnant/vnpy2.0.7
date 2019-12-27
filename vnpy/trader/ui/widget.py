@@ -104,7 +104,6 @@ class BidCell(BaseCell):
         """"""
         super(BidCell, self).__init__(content, data)
 
-        self.setForeground(COLOR_BLACK)
         self.setForeground(COLOR_BID)
 
 
@@ -117,7 +116,6 @@ class AskCell(BaseCell):
         """"""
         super(AskCell, self).__init__(content, data)
 
-        self.setForeground(COLOR_BLACK)
         self.setForeground(COLOR_ASK)
 
 
@@ -132,7 +130,7 @@ class PnlCell(BaseCell):
 
     def set_content(self, content: Any, data: Any):
         """
-        Cell color is set based on whether pnl is 
+        Cell color is set based on whether pnl is
         positive or negative.
         """
         super(PnlCell, self).set_content(content, data)
@@ -156,6 +154,9 @@ class TimeCell(BaseCell):
         """
         Time format is 12:12:12.5
         """
+        if content is None:
+            return
+
         timestamp = content.strftime("%H:%M:%S")
 
         millisecond = int(content.microsecond / 1000)
@@ -460,7 +461,7 @@ class PositionMonitor(BaseMonitor):
         "volume": {"display": "数量", "cell": BaseCell, "update": True},
         "yd_volume": {"display": "昨仓", "cell": BaseCell, "update": True},
         "frozen": {"display": "冻结", "cell": BaseCell, "update": True},
-        "price": {"display": "均价", "cell": BaseCell, "update": False},
+        "price": {"display": "均价", "cell": BaseCell, "update": True},
         "pnl": {"display": "盈亏", "cell": PnlCell, "update": True},
         "gateway_name": {"display": "接口", "cell": BaseCell, "update": False},
     }
@@ -993,7 +994,7 @@ class AboutDialog(QtWidgets.QDialog):
         text = """
             Developed by Traders, for Traders.
             License：MIT
-            
+
             Website：www.vnpy.com
             Github：www.github.com/vnpy/vnpy
 

@@ -33,7 +33,7 @@ class CtaTemplate(ABC):
         self.trading = False
         self.pos = 0
 
-        # Copy a new variables list here to avoid duplicate insert when multiple 
+        # Copy a new variables list here to avoid duplicate insert when multiple
         # strategy instances are created with the same strategy class.
         self.variables = copy(self.variables)
         self.variables.insert(0, "inited")
@@ -223,6 +223,7 @@ class CtaTemplate(ABC):
         days: int,
         interval: Interval = Interval.MINUTE,
         callback: Callable = None,
+        use_database: bool = False
     ):
         """
         Load historical bar data for initializing strategy.
@@ -230,7 +231,13 @@ class CtaTemplate(ABC):
         if not callback:
             callback = self.on_bar
 
-        self.cta_engine.load_bar(self.vt_symbol, days, interval, callback)
+        self.cta_engine.load_bar(
+            self.vt_symbol,
+            days,
+            interval,
+            callback,
+            use_database
+        )
 
     def load_tick(self, days: int):
         """
