@@ -3,7 +3,7 @@
 <p align="center">
   <img src ="https://vnpy.oss-cn-shanghai.aliyuncs.com/vnpy-logo.png"/>
 </p>
-
+与vnpy2.0.7 原版区别在自定义gateway给不同用户，在界面增加tick回测
 <p align="center">
     <img src ="https://img.shields.io/badge/version-2.0.7-blueviolet.svg"/>
     <img src ="https://img.shields.io/badge/platform-windows|linux|macos-yellow.svg"/>
